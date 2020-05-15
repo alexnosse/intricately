@@ -5,7 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    title: 'CARDS',
+    title: 'CARDS 2',
   },
   mutations: {
     setTitle(state, title: string) {
@@ -13,7 +13,7 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    setTitleAction(context, title: string) {
+    setTitle(context, title: string) {
       context.commit('setTitle', title);
     },
   },
