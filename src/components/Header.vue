@@ -22,7 +22,7 @@ export default class Header extends Vue {
 <style scoped lang="scss">
 .header {
   width: 100vw;
-  background-image: url('../assets/feltro.jpg');
+  background-color: #2A7100;
   height: 120px;
   display: flex;
   justify-content: center;

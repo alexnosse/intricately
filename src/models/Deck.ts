@@ -1,11 +1,17 @@
 import CardModel from './Card';
 
 export default class DeckModel {
-  id: number;
+  success: boolean;
+  deck_id: string;
+  remaining: number;
+  shuffled: boolean;
   cards: Array<CardModel>;
 
   constructor() {
-    this.id = 0;
+    this.success = false;
+    this.deck_id = '';
+    this.remaining = 0;
+    this.shuffled = false;
     this.cards = [];
   }
 }
