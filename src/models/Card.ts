@@ -1,10 +1,10 @@
 export default class CardModel {
-  raw: string;
+  code: string;
   value: string;
   suit: string;
 
   constructor() {
-    this.raw = '';
+    this.code = '';
     this.value = '';
     this.suit = '';
   }

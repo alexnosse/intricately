@@ -5,14 +5,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class Header extends Vue {
-  @Prop() private title!: string;
-
   get headerTitle(): string {
-    return this.title ? this.title : 'CARDS';
+    const { title } = this.$store.state;
+    return title;
   }
 }
 
@@ -21,7 +20,7 @@ export default class Header extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .header {
-  width: 100vw;
+  width: 100%;
   background-color: #2A7100;
   height: 120px;
   display: flex;

@@ -1,19 +1,29 @@
 <template>
-  <div class="deck">
-    <CardContainer :cards="pileCards" />
+  <div class="deck-container">
+    <CardContainer />
     <hr />
+    <div class="combo-container">
+      <h2> Rotation Card: {{rotation.code}}</h2>
+      <h2> Full House Combinations:<span v-if="fullHouseCombinations.length === 0"> None</span></h2>
+      <ul v-if="fullHouseCombinations.length > 0">
+        <li class="combinations" v-for="(item) in fullHouseCombinations" :key="item">
+          {{item}}
+        </li>
+      </ul>
 
-    <Card v-if="rotationValue && rotationSuit" :value="rotationValue" :suit="rotationSuit" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-// @ is an alias to /src
-
-import { Component, Prop, Vue } from 'vue-property-decorator';
-
+import { Component, Vue } from 'vue-property-decorator';
+import requestsHelper from '@/helpers/requests-helper';
+import { returnFullHouseCombinations } from '@/helpers/card-helper';
 import CardContainer from '@/components/CardContainer.vue';
 import Card from '@/components/Card.vue';
+import data from '@/config/config';
+import CardModel from '../models/Card';
+
 @Component({
   components: {
     CardContainer,
@@ -21,36 +31,40 @@ import Card from '@/components/Card.vue';
   },
 })
 export default class Deck extends Vue {
-  // TODO não preciso, o id vai vir da query string
-  @Prop() deck!: string;
+  rotation: CardModel = {} as CardModel;
 
-  @Prop() rotation!: string;
+  ordered: Array<CardModel> = [];
 
-  get rotationValue(): string {
-    if (this.rotation) {
-      return this.rotation.substring(0, 1);
-    }
-    return '';
+  get fullHouseCombinations() {
+    return returnFullHouseCombinations(this.ordered);
   }
 
-  get rotationSuit(): string {
-    if (this.rotation) {
-      return this.rotation.substring(this.rotation.length - 1);
-    }
-    return '';
-  }
-
-  get pileCards(): Array<string> {
-    if (this.deck) {
-      return this.deck.split(',');
-    }
-    return [];
-  }
-
-  mounted(): void {
+  async mounted() {
     this.$store.dispatch('setTitle', 'ORDERED PILE');
-    // console.log(this.$route.params);
+    const { deckId } = this.$route.params;
+    const { PileType } = data;
+    const rotationResponse = await requestsHelper.getCardsOnPile(deckId, PileType.ROTATION);
+    const orderedResponse = await requestsHelper.getCardsOnPile(deckId, PileType.ORDERED);
+
+    this.rotation = rotationResponse.piles.rotation.cards[0] as CardModel;
+    this.ordered = orderedResponse.piles.ordered.cards;
+    this.$store.dispatch('setCards', this.ordered);
+    this.$store.dispatch('setRotation', this.rotation);
   }
 }
 
 </script>
+<style scoped lang="scss">
+  .deck-container,
+  .combo-container {
+    padding: 18px;
+  }
+
+  .combo-container {
+    text-align: left;
+  }
+
+  .combinations {
+    padding-left: 22px;
+  }
+</style>

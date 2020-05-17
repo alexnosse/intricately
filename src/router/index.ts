@@ -26,6 +26,7 @@ const routes: Array<RouteConfig> = [
       },
     ],
   },
+  { path: '/deck', redirect: '/deck/new' },
   { path: '*', redirect: '/deck/new' },
 ];
 

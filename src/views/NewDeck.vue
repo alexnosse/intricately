@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <Loading :isVisible="isLoading" />
     <form
       id="cards"
       @submit="this.checkForm"
@@ -8,7 +9,12 @@
     >
       <div class="input-container" v-for="(item, index) in cardsQuantity" :key="index">
         <label>Card {{index + 1}}</label>
-        <input type="text" :id="'input_' + (index +1)" v-model="inputs[index]" />
+        <input
+          type="text"
+          :id="'input_' + (index + 1)"
+          v-model="inputs[index]"
+          v-on:blur="parseValue"
+        />
         <span class="error" v-if="!!errors[index]">
           <span v-if="errors[index] !== 'invalid'">
             Duplicated on card {{parseInt(errors[index], 10) + 1}}
@@ -42,10 +48,12 @@ import { Component, Vue } from 'vue-property-decorator';
 
 import { isValidCard, parseCardValue } from '@/helpers/card-helper';
 import requestsHelper from '@/helpers/requests-helper';
+import Loading from '@/components/Loading.vue';
 import DeckModel from '../models/Deck';
 
 @Component({
   components: {
+    Loading,
   },
 })
 export default class NewDeck extends Vue {
@@ -65,6 +73,8 @@ export default class NewDeck extends Vue {
 
   title = 'CARDS';
 
+  isLoading = false;
+
   mounted(): void {
     this.$store.dispatch('setTitle', 'CARDS');
   }
@@ -78,17 +88,27 @@ export default class NewDeck extends Vue {
     return new Array(this.quantity);
   }
 
+  parseValue() {
+    this.uppercaseAll();
+  }
+
+  uppercaseAll() {
+    this.inputs = this.inputs.map((val: string) => val.toUpperCase());
+    this.rotation = this.rotation.toUpperCase();
+  }
+
   checkForm(e: Event): boolean {
     this.rotationMissing = false;
     this.rotationOnDeck = false;
-    this.errors = new Array(this.quantity).fill('');
-    const validCards: Array<string> = [];
-    this.rotation = parseCardValue(this.rotation);
     let shouldSubmit = true;
+
+    const validCards: Array<string> = [];
+    this.errors = new Array(this.quantity).fill('');
+    this.rotation = parseCardValue(this.rotation);
+
     if (isValidCard(this.rotation)) {
       this.inputs.forEach((val: string, index: number) => {
         const cardValue = parseCardValue(val);
-
         if (isValidCard(cardValue)) {
           const foundIndex = validCards.findIndex((item: string) => item === cardValue);
           if (foundIndex === -1) {
@@ -106,15 +126,21 @@ export default class NewDeck extends Vue {
     }
 
     this.rotationOnDeck = validCards.findIndex((item: string) => item === this.rotation) !== -1;
+
     if (!this.rotationMissing && !this.rotationOnDeck && shouldSubmit) {
-      this.validCards = validCards.join(',');
-      requestsHelper.createNewDeck(this.validCards).then((response: DeckModel) => {
-        this.$router.push({
-          name: 'Deck',
-          params: {
-            deckId: response.deck_id,
-          },
-        });
+      this.isLoading = true;
+      requestsHelper.createNewDeck(validCards, this.rotation).then((response: DeckModel) => {
+        if (response.deck_id) {
+          this.$router.push({
+            name: 'Deck',
+            params: {
+              deckId: response.deck_id,
+            },
+          });
+        } else {
+          // TODO: TOAST COMPONENT ERROR
+        }
+        this.isLoading = false;
       });
     }
 
@@ -151,7 +177,7 @@ export default class NewDeck extends Vue {
       color:#F6E503;
       font-weight: bold;
       border: 0px;
-      border-radius: 10px;
+      border-radius: 25px;
       padding: 12px;
       font-size: 32px;
     }
