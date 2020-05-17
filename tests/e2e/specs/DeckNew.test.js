@@ -22,7 +22,7 @@ describe('Go to /deck/new, submitting with a valid data', () => {
     cy.get('#rotationCard').type('2H');
     cy.get('button').click();
     cy.wait(1000);
-    cy.get('.header').should('include', 'ORDERED PILE');
+    cy.get('.home > .header').contains('ORDERED PILE');
   });
 });
 
@@ -36,6 +36,7 @@ describe('Go to /deck/new, submitting with a blank data', () => {
     cy.url().should('include', 'deck/new');
   });
 });
+
 describe('Go to /deck/new, not submitting rotation card', () => {
   it('should show some warnings and should stay at the same route', () => {
     cy.visit('/deck/new');
