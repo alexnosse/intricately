@@ -1,11 +1,19 @@
 import CardModel from './Card';
 
-export default class DeckModel {
-  id: number;
+export default interface DeckModel {
+  success: boolean;
+  deck_id: string;
+  remaining: number;
+  shuffled: boolean;
   cards: Array<CardModel>;
+  piles: Piles;
+}
 
-  constructor() {
-    this.id = 0;
-    this.cards = [];
-  }
+interface Piles {
+  ordered: Pile;
+  rotation: Pile;
+}
+
+interface Pile {
+  cards: Array<CardModel>;
 }

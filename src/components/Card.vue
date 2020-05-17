@@ -1,26 +1,29 @@
 <template>
   <div class="card">
     <div :class="['top-value-suit value-suit', suit]">{{transformValue}}</div>
-    <div :class="['card-body', bodyCssClass, suit]"></div>
+    <div :class="['card-body', suit]"></div>
     <div :class="['bottom-value-suit value-suit', suit]">{{transformValue}}</div>
   </div>
-
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import CardModel from '../models/Card';
 
 @Component
 export default class Card extends Vue {
-  @Prop() private value!: string;
+  @Prop() private card!: CardModel;
 
-  @Prop() private suit!: string;
+  get suit(): string {
+    return this.card && this.card.code ? this.card.code.substring(this.card.code.length - 1) : '';
+  }
 
   get transformValue(): string {
-    if (this.value === '0') {
+    const v = this.card && this.card.code ? this.card.code.substring(0, 1) : '';
+    if (v === '0') {
       return '10';
     }
-    return this.value;
+    return v;
   }
 }
 </script>
